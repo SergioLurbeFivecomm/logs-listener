@@ -3,7 +3,6 @@ import { AddressRepository, DeviceRepository, } from "../../../common/repositori
 import { FrameService } from "../interfaces/frame-service";
 import { SigtecFrame } from '../sigtec.frame';
 import { Address, Device, Coverage } from "../../../common/entities/entitities";
-import { DateUtils } from "../../../common/utils/date.utils";
 import { logger } from "../../../config/winston-config";
 import { CoverageRepository } from '../../../common/repositories/coverage.repository';
 import { MqttSenderService } from '../../mqtt/mqtt-sender.service';
@@ -11,14 +10,15 @@ import { DeviceCommonService } from '../../../common/services/device-common.serv
 
 
 export class SigtecFrameService implements FrameService {
+    private timestamp: string;
     private mqttSenderService: MqttSenderService;
     private addressRepository: AddressRepository;
     private deviceRepository: DeviceRepository;
     private coverageRepository: CoverageRepository;
     private deviceCommonService: DeviceCommonService;
 
-    constructor(mqttSenderService: MqttSenderService, repositoryFactory: RepositoryFactory) {
-        this.mqttSenderService = mqttSenderService;
+    constructor(repositoryFactory: RepositoryFactory, timestamp: string) {
+        this.timestamp = timestamp;
         this.addressRepository = repositoryFactory.createAddressRepository();
         this.deviceRepository = repositoryFactory.createDeviceRepository();
         this.coverageRepository = repositoryFactory.createCoverageRepository();
@@ -54,13 +54,13 @@ export class SigtecFrameService implements FrameService {
             cid: sigtecFrame.getCid(),
             bw: sigtecFrame.getBw(),
             idCov: sigtecFrame.getIdCov(),
-            timestamp: sigtecFrame.getTimestamp(),
+            receptionTime: sigtecFrame.getTimestamp(),
             device: device
         }
     }
 
     private sendFrame(address: Address, device: Device, imei: string): void {
-        const localTime = DateUtils.getCurrentDateStringFormat();
+        const localTime = this.timestamp;
         try {
             let message = {
                 reportTime: device.reportTime,

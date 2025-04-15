@@ -1,34 +1,47 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    Entity,
+    Index,
+    JoinColumn,
     ManyToOne,
-    JoinColumn
-} from 'typeorm';
-import { Device } from './device.entity';
-import { Meter } from './meter.entity';
-import { DateTime } from 'luxon';
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Device, Meter } from "./entitities";
 
 
-@Entity('GREYLISTITEM')
-export class GreyListItem {
-    @PrimaryGeneratedColumn()
+@Index("meter_id", ["meterId"], {})
+@Index("idx_greylist_imei_reception_time", ["deviceImei", "receptionTime"], {})
+@Entity("greylist_item", { schema: "wiot_db" })
+export class GreylistItem {
+    @PrimaryGeneratedColumn({ type: "int", name: "id" })
     id: number;
-    
-    @Column('int', { name:'num_veces', nullable: true })
-    numVeces: number;
 
-    @Column('int', { nullable: true })
+    @Column("datetime", { name: "reception_time" })
+    receptionTime: string;
+
+    @Column("smallint", { name: "rssi" })
     rssi: number;
 
-    @Column('timestamp')
-    timestamp: string;
+    @Column("smallint", { name: "view_count" })
+    viewCount: number;
 
-    @ManyToOne(() => Device)
-    @JoinColumn({ name: 'device_id' })
-    device?: Device;
+    @Column("varchar", { name: "device_imei", length: 15 })
+    deviceImei: string;
 
-    @ManyToOne(() => Meter)
-    @JoinColumn({ name: 'meter_id' })
-    meter?: Meter;
+    @Column("varchar", { name: "meter_id", length: 50 })
+    meterId: string;
+
+    @ManyToOne(() => Device, (device) => device.greylistItems, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "device_imei", referencedColumnName: "imei" }])
+    device: Device;
+
+    @ManyToOne(() => Meter, (meter) => meter.greylistItems, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "meter_id", referencedColumnName: "meterId" }])
+    meter: Meter;
 }

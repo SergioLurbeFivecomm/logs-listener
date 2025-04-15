@@ -12,19 +12,17 @@ import { FrameType } from '../enum/frame-type';
 type ServiceCreator = () => FrameService;
 
 export class FrameServiceFactory {
-    private mqttSenderService: MqttSenderService;
     private repositoryFactory: RepositoryFactory;
     private services: Record<FrameType, ServiceCreator>;
 
-    constructor(mqttSenderService: MqttSenderService, repositoryFactory: RepositoryFactory) {
-        this.mqttSenderService = mqttSenderService;
+    constructor(repositoryFactory: RepositoryFactory, timestamp: string) {
         this.repositoryFactory = repositoryFactory;
         this.services = {
-            [FrameType.A1Frame]: () => new A1FrameService(this.mqttSenderService, this.repositoryFactory),
-            [FrameType.DeviceStatusFrame]: () => new DeviceStatusFrameService(this.mqttSenderService, this.repositoryFactory),
-            [FrameType.GreyListFrame]: () => new GreyListFrameService(this.mqttSenderService, this.repositoryFactory),
-            [FrameType.SigtecFrame]: () => new SigtecFrameService(this.mqttSenderService, this.repositoryFactory),
-            [FrameType.WiotDataFrame]: () => new WiotDataFrameService(this.mqttSenderService, this.repositoryFactory)
+            [FrameType.A1Frame]: () => new A1FrameService(this.repositoryFactory, timestamp),
+            [FrameType.DeviceStatusFrame]: () => new DeviceStatusFrameService(this.repositoryFactory, timestamp),
+            [FrameType.GreyListFrame]: () => new GreyListFrameService(this.repositoryFactory, timestamp),
+            [FrameType.SigtecFrame]: () => new SigtecFrameService(this.repositoryFactory, timestamp),
+            [FrameType.WiotDataFrame]: () => new WiotDataFrameService(this.repositoryFactory, timestamp)
         };
     }
 

@@ -1,15 +1,15 @@
 import { DataSource, Repository, UpdateResult } from 'typeorm';
-import { GreyListItem } from '../entities/grey-list-item.entity';
+import { GreylistItem } from '../entities/grey-list-item.entity';
 
 
 export class GreyListItemRepository {
-    private readonly _repository: Repository<GreyListItem>;
+    private readonly _repository: Repository<GreylistItem>;
 
     constructor(dataSource: DataSource) {
-        this._repository = dataSource.getRepository(GreyListItem);
+        this._repository = dataSource.getRepository(GreylistItem);
     }
 
-    findAllByImeiDate(imei: string, date: string): Promise<GreyListItem[]> {
+    findAllByImeiDate(imei: string, date: string): Promise<GreylistItem[]> {
         return this._repository
             .createQueryBuilder('greyList')
             .innerJoinAndSelect('greyList.meter', 'meter')
@@ -18,7 +18,7 @@ export class GreyListItemRepository {
             .getMany();
     }
 
-    findLastGreyListItemByMeterId(meter_id: string): Promise<GreyListItem> {
+    findLastGreyListItemByMeterId(meter_id: string): Promise<GreylistItem> {
         return this._repository
             .createQueryBuilder('greyList')
             .innerJoin('greyList.meter', 'meter')
@@ -27,11 +27,11 @@ export class GreyListItemRepository {
             .getOne()
     }
 
-    updateGreyListItem(id: number, updatedGreyList: Partial<GreyListItem>): Promise<UpdateResult>{
+    updateGreyListItem(id: number, updatedGreyList: Partial<GreylistItem>): Promise<UpdateResult>{
         return this._repository.update({id}, updatedGreyList);
     }
 
-    createGreyListItem(greyList: Partial<GreyListItem>){
+    createGreyListItem(greyList: Partial<GreylistItem>){
         return this._repository.save(greyList);
     }
 

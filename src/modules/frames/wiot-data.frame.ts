@@ -12,13 +12,13 @@ export class WiotDataFrame implements Frame {
     private isSimpleFrame: boolean;
     private wiotData: WiotDataFields[];
 
-    constructor(imei: string, payload: string) {
+    constructor(imei: string, payload: string, timestamp: string) {
         this.imei = imei;
         this.payload = payload;
         this.isValidPayload();
         const dayOfFrame = +payload.slice(0, 1)
         this.isSensusRf = this.determineSensusRf();
-        this.backupTime = this.parseBackupTime(dayOfFrame);
+        this.backupTime = this.parseBackupTime(dayOfFrame, timestamp);
         this.isSimpleFrame = (payload.charAt(1) == ';')? true : false;
         this.wiotData = this.parseData();
     }
@@ -40,8 +40,8 @@ export class WiotDataFrame implements Frame {
         }
     }
 
-    private parseBackupTime(dayOfFrame: number): string {
-        const currentTime = DateUtils.getCurrentDateStringFormat();
+    private parseBackupTime(dayOfFrame: number, timestamp: string): string {
+        const currentTime = timestamp;
         if (dayOfFrame >= 0 && dayOfFrame <= +process.env.BACKUP_LIMIT) {
             return DateUtils.subtractDaysFromDate(currentTime, dayOfFrame);
         } else {

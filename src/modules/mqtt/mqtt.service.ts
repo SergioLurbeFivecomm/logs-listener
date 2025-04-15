@@ -6,6 +6,7 @@ import { FrameFactory } from '../frames/factories/frame.factory';
 import { Exception } from '../../common/exceptions/exception';
 import { FrameServiceFactory } from '../frames/factories/frame-service.factory';
 import { IBrokerConfig } from 'src/common/interfaces/broker-config.interface';
+import { Timestamp } from 'typeorm';
 
 
 
@@ -97,10 +98,10 @@ export class MqttService {
         logger.info(`Message received on ${topic}: ${message}`);
         try {
             const frameFactory = new FrameFactory();
-            const frame = frameFactory.createFrame(topic, message);
-            const serviceFactory = new FrameServiceFactory(this.mqttSenderService, this.repositoryFactory);
-            const frameService = serviceFactory.getService(frame);
-            await frameService.handleMessage(frame);
+            //const frame = frameFactory.createFrame(topic, message, Timestamp);
+            //const serviceFactory = new FrameServiceFactory(this.mqttSenderService, this.repositoryFactory);
+            //const frameService = serviceFactory.getService(frame);
+            //await frameService.handleMessage(frame);
         } catch (error) {
             if (error instanceof Exception) {
                 logger.warn(`${error.name} ${error.message}`);

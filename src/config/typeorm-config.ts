@@ -1,4 +1,4 @@
-import { Address, Alarms, Coverage, WiotData, Device, GreyListItem, WhiteListItem, Meter } from '../common/entities/entitities';
+import { Address, Alarms, Coverage, WiotData, Device, GreylistItem, WhitelistItem, Meter } from '../common/entities/entitities';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
 
@@ -9,7 +9,7 @@ export const ormConfig: DataSourceOptions = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [Device, Coverage, WiotData, GreyListItem, WhiteListItem, Address, Alarms, Meter],
+    entities: [Device, Coverage, WiotData, GreylistItem, WhitelistItem, Address, Alarms, Meter],
     synchronize: false,
     logging: false,
     extra: {

@@ -1,16 +1,17 @@
 import { DataSource, Repository } from 'typeorm';
-import { WhiteListItem } from '../entities/white-list-item.entity';
+import { WhitelistItem } from '../entities/entitities';
+
 
 
 export class WhiteListItemRepository {
-    private readonly _repository: Repository<WhiteListItem>;
+    private readonly _repository: Repository<WhitelistItem>;
 
     constructor(dataSource: DataSource) {
-        this._repository = dataSource.getRepository(WhiteListItem);
+        this._repository = dataSource.getRepository(WhitelistItem);
     }
 
     //!TODO: En whitelist si el timestamp no es el de hoy no enviarla.
-    findWhiteListByImei(imei: string): Promise<WhiteListItem[]> {
+    findWhiteListByImei(imei: string): Promise<WhitelistItem[]> {
         return this._repository
             .createQueryBuilder('whitelist')
             .innerJoin('whitelist.device', 'device')
@@ -20,7 +21,7 @@ export class WhiteListItemRepository {
             .getMany();
     }
     
-    createWhiteListByList(whiteList: WhiteListItem[]) {
+    createWhiteListByList(whiteList: WhitelistItem[]) {
         return this._repository.save(whiteList);
     }
 }

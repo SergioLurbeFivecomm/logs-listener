@@ -9,7 +9,7 @@ export class DeviceStatusFrame implements Frame {
     private imei: string;
     private config: Config;
     private sigtec: string;
-    private battery: number;
+    private battery: string;
     private alarms: string[];
 
     constructor(imei: string, payload: string){
@@ -44,7 +44,7 @@ export class DeviceStatusFrame implements Frame {
         return this.sigtec;
     }
 
-    public getBattery(): number {
+    public getBattery(): string {
         return this.battery;
     }
 

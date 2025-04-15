@@ -1,50 +1,141 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    Entity,
+    Index,
+    JoinColumn,
     ManyToOne,
-    JoinColumn
-} from 'typeorm';
-import { Device } from './device.entity';
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Device } from "./entitities";
 
-
-@Entity('ALARMS')
+@Index("idx_alarms_imei_reception_time", ["deviceImei", "receptionTime"], {})
+@Entity("alarms", { schema: "wiot_db" })
 export class Alarms {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ type: "int", name: "id" })
     id?: number;
 
-    @Column('int', {name:"sd_not_detected", nullable: true, unsigned: true })
-    sdNotDetected: number;
+    @Column("datetime", { name: "reception_time" })
+    receptionTime: string;
 
-    @Column('int', {name:"sd_formated", nullable: true, unsigned: true })
-    sdFormated: number;
+    @Column("tinyint", {
+        name: "sd_not_detected",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    sdNotDetected: boolean | null;
 
-    @Column('int', {name:"sd_could_not_format", nullable: true, unsigned: true })
-    sdCouldNotFormat: number;
+    @Column("tinyint", {
+        name: "sd_formatted",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    sdFormatted: boolean | null;
 
-    @Column('int', {name:"no_wmb_read", nullable: true, unsigned: true })
-    noWmbRead: number;
+    @Column("tinyint", {
+        name: "sd_could_not_format",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    sdCouldNotFormat: boolean | null;
 
-    @Column('int', {name:"primary_server_failed", nullable: true, unsigned: true })
-    primaryServerFailed: number;
+    @Column("tinyint", {
+        name: "no_wmb_read",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    noWmbRead: boolean | null;
 
-    @Column('int', {name:"all_backups_filled", nullable: true, unsigned: true })
-    allBackupsFilled: number;
+    @Column("tinyint", {
+        name: "primary_server_failed",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    primaryServerFailed: boolean | null;
 
-    @Column('int', {name:"sim_failed", nullable: true, unsigned: true })
-    simFailed: number;
+    @Column("tinyint", {
+        name: "all_backups_filled",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    allBackupsFilled: boolean | null;
 
-    @Column('int', {name:"eprom_failed", nullable: true, unsigned: true })
-    epromFailed: number;
+    @Column("tinyint", {
+        name: "sim_failed",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    simFailed: boolean | null;
 
-    @Column('int', {name:"sd_could_not_mount", nullable: true, unsigned: true })
-    sdCouldNotMount?: number;
+    @Column("tinyint", {
+        name: "eprom_failed",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    epromFailed: boolean | null;
 
-    @Column('timestamp', { nullable: false })
-    timestamp: string;
+    @Column("tinyint", {
+        name: "sd_could_not_mount",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    sdCouldNotMount: boolean | null;
 
-    @ManyToOne(() => Device)
-    @JoinColumn({ name: 'device_id' })
+    @Column("tinyint", {
+        name: "rst_nmi",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    rstNmi: boolean | null;
+
+    @Column("tinyint", {
+        name: "rst_hard_fault",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    rstHardFault: boolean | null;
+
+    @Column("tinyint", {
+        name: "rst_usage_fault",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    rstUsageFault: boolean | null;
+
+    @Column("tinyint", {
+        name: "rst_bus_fault",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    rstBusFault: boolean | null;
+
+    @Column("tinyint", {
+        name: "rst_mem_manage",
+        nullable: true,
+        width: 1,
+        default: () => "'0'",
+    })
+    rstMemManage: boolean | null;
+
+    @Column("varchar", { name: "device_imei", length: 15 })
+    deviceImei: string;
+
+    @ManyToOne(() => Device, (device) => device.alarms, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "device_imei", referencedColumnName: "imei" }])
     device: Device;
-
 }

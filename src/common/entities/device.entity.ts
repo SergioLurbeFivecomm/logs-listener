@@ -1,99 +1,167 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { Coverage } from './coverage.entity';
-import { WiotData } from './wiot-data.entity';
-import { GreyListItem } from './grey-list-item.entity';
-import { WhiteListItem } from './white-list-item.entity';
-import { Address } from './address.entity';
-import { Alarms } from './alarms.entity';
+import {
+    Column,
+    Entity,
+    Index,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+} from "typeorm";
+import { Address, Alarms, Coverage, WiotData } from "./entitities";
+import { GreylistItem } from "./grey-list-item.entity";
+import { WhitelistItem } from "./white-list-item.entity";
 
-@Entity('DEVICE')
-@Index(["sn"])
+
+@Index("address_id", ["addressId"], {})
+@Index("idx_sn", ["sn"], {})
+@Index("idx_last_message_sent", ["lastMessageSent"], {})
+@Entity("device", { schema: "wiot_db" })
 export class Device {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column('varchar', { unique: true, length: 40 })
+    @Column("varchar", { primary: true, name: "imei", length: 15 })
     imei: string;
 
-    @Column('timestamp')
-    timestamp?: string;
-
-    @Column('varchar', {name:"report_time", length: 10, default: '23:00' })
-    reportTime: string;
-
-    @Column('varchar', { length: 30, nullable: true })
-    fw: string;
-
-    @Column('varchar', { length: 30, nullable: true })
-    hw: string;
-
-    @Column('int', {name:"signal_threshold", default: '-120' })
-    signalThreshold: number;
-
-    @Column('varchar', { length: 50 })
+    @Column("varchar", { name: "sn", length: 30 })
     sn: string;
 
-    @Column('double', { nullable: true })
-    battery: number;
+    @Column("varchar", { name: "imsi", nullable: true, length: 15 })
+    imsi: string | null;
 
-    @Column('varchar', { length: 30, nullable: true })
-    apn: string;
+    @Column("datetime", { name: "boot_time", nullable: true })
+    bootTime: string | null;
 
-    @Column('varchar', {name:"filter_vertical", length: 500, nullable: true })
-    filterVertical: string;
+    @Column("datetime", { name: "last_message_sent", nullable: true })
+    lastMessageSent: string | null;
 
-    @Column('varchar', {name:"filter_model", length: 100, nullable: true })
-    filterModel: string;
+    @Column("datetime", { name: "registered_time", nullable: true })
+    registeredTime: string | null;
 
-    @Column('varchar', {name:"filter_manufacturer", length: 100, nullable: true })
-    filterManufacturer: string;
+    @Column("varchar", {
+        name: "report_time",
+        nullable: true,
+        length: 5,
+        default: () => "'23:00'",
+    })
+    reportTime: string | null;
 
-    @Column('varchar', {name:"wmb_modes", length: 255, nullable: true })
-    wmbModes?: string;
+    @Column("varchar", { name: "firmware", nullable: true, length: 255 })
+    firmware: string | null;
 
-    @Column('int', {name:"wmb_measurement_interval", nullable: true })
-    wmbMeasurementInterval: number;
+    @Column("varchar", { name: "hardware", nullable: true, length: 255 })
+    hardware: string | null;
 
-    @Column('int', {name:"wmb_measurement_window", default: '25' })
-    wmbMeasurementWindow: number;
+    @Column("int", {
+        name: "send_period",
+        nullable: true,
+        default: () => "'3600'",
+    })
+    sendPeriod: number | null;
 
-    @Column('int', { name: "send_period",nullable: true })
-    sendPeriod?: number;
+    @Column("int", {
+        name: "read_period",
+        nullable: true,
+        default: () => "'900'",
+    })
+    readPeriod: number | null;
 
-    @Column('int', { name: "read_period",nullable: true })
-    readPeriod?: number;
+    @Column("decimal", {
+        name: "battery",
+        nullable: true,
+        precision: 6,
+        scale: 4,
+    })
+    battery: string | null;
 
-    @Column('varchar', { length: 50, nullable: true })
-    imsi: string;
+    @Column("decimal", {
+        name: "first_battery_reported",
+        nullable: true,
+        precision: 6,
+        scale: 4,
+    })
+    firstBatteryReported: string | null;
 
-    @Column('varchar', {name:"sequans_version", length: 50, nullable: true })
-    sequansVersion: string;
+    @Column("smallint", {
+        name: "signal_threshold",
+        nullable: true,
+        default: () => "'-120'",
+    })
+    signalThreshold: number | null;
 
-    @Column('datetime', {name:"last_message_sent", nullable: true })
-    lastMessageSent: string;
+    @Column("varchar", { name: "sequans_version", nullable: true, length: 50 })
+    sequansVersion: string | null;
 
-    @Column('varchar', { length: 100, nullable: true })
-    fota: string;
+    @Column("varchar", { name: "apn", nullable: true, length: 100 })
+    apn: string | null;
 
-    @Column('varchar', { length: 100, nullable: true })
-    key?: string;
+    @Column("varchar", {
+        name: "fota",
+        nullable: true,
+        length: 255,
+        default: () => "'None'",
+    })
+    fota: string | null;
 
-    @OneToMany(() => Coverage, coverage => coverage.device)
-    coverages: Coverage[];
+    @Column("varchar", {
+        name: "filter_vertical",
+        nullable: true,
+        length: 500,
+        default: () =>
+            "'00,01,02,04,07,16,30,37,00,06,15,28,21,25,31,32,33,36,38,05,1d,1e,1f,26,27,34,35,39,3a,3b,3c,3d,3e,3f'",
+    })
+    filterVertical: string | null;
 
-    @OneToMany(() => WiotData, wiotData => wiotData.device)
-    datas: WiotData[];
+    @Column("varchar", {
+        name: "filter_manufacturer",
+        nullable: true,
+        length: 255,
+        default: () => "'AE4C,A511,0907,9215,2D2C,B44C,9526,304C,1AC3'",
+    })
+    filterManufacturer: string | null;
 
-    @OneToMany(() => GreyListItem, greyList => greyList.device)
-    greyLists: GreyListItem[];
+    @Column("varchar", { name: "filter_model", nullable: true, length: 100 })
+    filterModel: string | null;
 
-    @OneToMany(() => WhiteListItem, whiteList => whiteList.device)
-    whiteLists: WhiteListItem[];
+    @Column("varchar", {
+        name: "wmb_modes",
+        nullable: true,
+        length: 100,
+        default: () => "'T1'",
+    })
+    wmbModes: string | null;
 
-    @OneToMany(() => Alarms, alarms => alarms.device)
+    @Column("smallint", { name: "wmb_measurement_interval", nullable: true })
+    wmbMeasurementInterval: number | null;
+
+    @Column("smallint", {
+        name: "wmb_measurement_window",
+        nullable: true,
+        default: () => "'25'",
+    })
+    wmbMeasurementWindow: number | null;
+
+    @Column("varchar", { name: "key", nullable: true, length: 100 })
+    key: string | null;
+
+    @Column("int", { name: "address_id", default: () => "'1'" })
+    addressId: number;
+
+    @ManyToOne(() => Address, (address) => address.devices, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "address_id", referencedColumnName: "id" }])
+    address: Address;
+
+    @OneToMany(() => WiotData, (wiotData) => wiotData.device)
+    wiotData: WiotData[];
+
+    @OneToMany(() => GreylistItem, (greylistItem) => greylistItem.device)
+    greylistItems: GreylistItem[];
+
+    @OneToMany(() => WhitelistItem, (whitelistItem) => whitelistItem.device)
+    whitelistItems: WhitelistItem[];
+
+    @OneToMany(() => Alarms, (alarms) => alarms.device)
     alarms: Alarms[];
 
-    @ManyToOne(() => Address)
-    @JoinColumn({ name: 'address_id', referencedColumnName: 'id' })
-    address: Address;
+    @OneToMany(() => Coverage, (coverage) => coverage.device)
+    coverages: Coverage[];
 }

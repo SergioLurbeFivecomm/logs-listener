@@ -1,6 +1,4 @@
 import { DeviceStatusFrame } from '../device-status.frame';
-import { ConfigResponse } from '../interfaces/response/config-response';
-import { DateUtils } from '../../../common/utils/date.utils';
 import { FrameService } from '../interfaces/frame-service';
 import { DeviceRepository } from '../../../common/repositories/device.repository';
 import { Exception } from '../../../common/exceptions/exception';
@@ -14,15 +12,15 @@ import { MqttSenderService } from '../../mqtt/mqtt-sender.service';
 import { DeviceCommonService } from '../../../common/services/device-common.service';
 
 export class DeviceStatusFrameService implements FrameService {
-    private mqttSenderService: MqttSenderService;
+    private timestamp: string;
     private deviceRepository: DeviceRepository;
     private coverageRepository: CoverageRepository;
     private alarmsRepository: AlarmsRepository;
     private addressRepository: AddressRepository;
     private deviceCommonService: DeviceCommonService;
 
-    constructor(mqttSenderService: MqttSenderService, repositoryFactory: RepositoryFactory) {
-        this.mqttSenderService = mqttSenderService;
+    constructor(repositoryFactory: RepositoryFactory, timestamp: string) {
+        this.timestamp = timestamp;
         this.deviceRepository = repositoryFactory.createDeviceRepository();
         this.coverageRepository = repositoryFactory.createCoverageRepository();
         this.alarmsRepository = repositoryFactory.createAlarmsRepository();
@@ -35,38 +33,16 @@ export class DeviceStatusFrameService implements FrameService {
         const device = await this.deviceCommonService.findDeviceByImei(imei);
         const address = await this.addressRepository.findAddressByImei(imei);
         if(!address) throw new Exception('Address not found', `Address not found for imei: ${imei} in Device Status Frame Service handle message`)
-        const update = device.fota;
         await this.updateDeviceStatusProperties(deviceStatusFrame, device, address);
-        this.sendResponse(device, address, imei, update);
     }
 
-    private sendResponse(device: Device, address: Address, imei: string, update: string): void {
-        const response: ConfigResponse = {
-            reportTime: device.reportTime,
-            granularity: device.wmbMeasurementWindow,
-            wmbModes: device.wmbModes,
-            fotaIp: address.fotaIp,
-            update: update,
-            allowedManufacturers: device.filterManufacturer,
-            allowedTypes: device.filterVertical,
-            srvAddr: address.primary + ',' + address.secondary,
-            currentTime: DateUtils.getCurrentDateStringFormat()
-        };
-    
-        if (process.env.READ_SEND_PERIODS_ENABLED == '1') {
-            response.sendPeriod = device.sendPeriod;
-            response.readPeriod = device.readPeriod;
-        }
-    
-        this.mqttSenderService.sendMessage(`r${imei}`, JSON.stringify(response));
-    }
     
 
     private async updateDeviceStatusProperties(deviceStatusFrame: DeviceStatusFrame, device: Device, address: Address) {
         device.fota = 'None';
-        device.lastMessageSent = DateUtils.getCurrentDateStringFormat();
-        const coverage = DeviceStatusHelper.prepareCoverage(deviceStatusFrame.getSigtec(), device);
-        const alarms = DeviceStatusHelper.prepareAlarms(deviceStatusFrame.getAlarms(), device);
+        device.lastMessageSent = this.timestamp;
+        const coverage = DeviceStatusHelper.prepareCoverage(deviceStatusFrame.getSigtec(), device, this.timestamp);
+        const alarms = DeviceStatusHelper.prepareAlarms(deviceStatusFrame.getAlarms(), device, this.timestamp);
         const devicePrepared = DeviceStatusHelper.prepareDevice(deviceStatusFrame, device);
         const addressPrepared = await this.checkAddressUpdate(deviceStatusFrame.getConfig(), address);
         device.address = addressPrepared;

@@ -1,20 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Device } from './device.entity';
+import {
+    Column,
+    Entity,
+    Index,
+    OneToMany,
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Device } from "./entitities";
 
-@Entity('ADDRESS')
+
+@Index("idx_address_fota_ip", ["fotaIp"], {})
+@Entity("address", { schema: "wiot_db" })
 export class Address {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ type: "int", name: "id" })
     id?: number;
 
-    @Column('varchar', { length: 255, nullable: false })
+    @Column("varchar", { name: "primary", length: 255 })
     primary: string;
 
-    @Column('varchar', { length: 255, nullable: false })
+    @Column("varchar", { name: "secondary", length: 255 })
     secondary: string;
 
-    @Column('varchar', {name: "fota_ip", length: 255, nullable: false })
+    @Column("varchar", { name: "fota_ip", length: 255 })
     fotaIp: string;
 
-    @OneToMany(() => Device, device => device.address)
-    device?: Device[];
+    @OneToMany(() => Device, (device) => device.address)
+    devices?: Device[];
 }

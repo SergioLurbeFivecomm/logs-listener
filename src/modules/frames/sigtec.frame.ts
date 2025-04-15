@@ -4,29 +4,29 @@ import { Frame } from "./interfaces/frame";
 
 export class SigtecFrame implements Frame {
     private imei: string;
-    private battery: number;
+    private battery: string;
     private coverageValues: string[];
     private cc: number;
     private nc: string;
     private tac: number;
     private band: string;
     private earfcn: number;
-    private rsrp: number;
-    private rsrq: number;
+    private rsrp: string;
+    private rsrq: string;
     private pwd: number;
     private paging: number;
     private cid: string;
     private bw: number;
-    private idCov: string;
+    private idCov: number;
     private timestamp: string;
 
 
-    constructor(imei: string, payload: string){
+    constructor(imei: string, payload: string, timestamp: string){
         this.imei = imei;
         const coverageValues = this.extractCoverageValues(payload.split(';'));
-        this.transformToCoverage(coverageValues);
+        this.transformToCoverage(coverageValues, timestamp);
         let splitPayload = payload.split(';');
-        this.battery = parseFloat(splitPayload[splitPayload.length - 2]);
+        this.battery = splitPayload[splitPayload.length - 2];
     }
 
 
@@ -41,20 +41,20 @@ export class SigtecFrame implements Frame {
         }, {});
     }
 
-    private transformToCoverage(values: Record<string, string>): void {
+    private transformToCoverage(values: Record<string, string>, timestamp: string): void {
         this.cc = parseInt(values['Cc'], 10);
         this.nc = values['Nc'];
         this.tac = parseInt(values['TAC'], 10);
         this.band = values['BAND'];
         this.earfcn =  parseInt(values['EARFCN'], 10);
-        this.rsrp =  parseFloat(values['RSRP']);
-        this.rsrq =  parseFloat(values['RSRQ']);
+        this.rsrp =  values['RSRP'];
+        this.rsrq =  values['RSRQ'];
         this.pwd =  parseInt(values['PWR'], 10);
         this.paging =  parseInt(values['PAGING'], 10);
         this.cid =  values['CID'];
         this.bw =  parseInt(values['BW'], 10);
-        this.idCov =  values['Id'];
-        this.timestamp = DateUtils.getCurrentDateStringFormat();
+        this.idCov =  parseInt(values['Id'], 10);
+        this.timestamp = timestamp;
     }
 
 
@@ -66,7 +66,7 @@ export class SigtecFrame implements Frame {
         return this.imei;
     }
 
-    public getBattery(): number {
+    public getBattery(): string {
         return this.battery;
     }
 
@@ -90,11 +90,11 @@ export class SigtecFrame implements Frame {
         return this.earfcn;
     }
 
-    public getRsrp(): number {
+    public getRsrp(): string {
         return this.rsrp;
     }
 
-    public getRsrq(): number {
+    public getRsrq(): string {
         return this.rsrq;
     }
 
@@ -114,7 +114,7 @@ export class SigtecFrame implements Frame {
         return this.bw;
     }
 
-    public getIdCov(): string {
+    public getIdCov(): number {
         return this.idCov;
     }
 

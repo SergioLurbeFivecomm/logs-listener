@@ -2,14 +2,15 @@ import { DeviceRepository, GreyListItemRepository, MeterRepository, WhiteListIte
 import { FrameService } from "../interfaces/frame-service";
 import { RepositoryFactory } from "../../../common/factories/repository-factory";
 import { GreyListFrame } from '../greylist.frame';
-import { GreyListItem, Meter, Device, WhiteListItem } from '../../../common/entities/entitities';
+import { Meter, Device, GreylistItem, WhitelistItem } from '../../../common/entities/entitities';
 import { logger } from "../../../config/winston-config";
-import { DateUtils } from "../../../common/utils/date.utils";
 import { MqttSenderService } from '../../mqtt/mqtt-sender.service';
 import { DeviceCommonService } from '../../../common/services/device-common.service';
-import { manufacturerMap } from '../../../common/maps/manufacturer.map';
+import * as readline from 'readline';
+
 
 export class GreyListFrameService implements FrameService {
+    private timestamp: string;
     private mqttSenderService: MqttSenderService;
     private deviceRepository: DeviceRepository;
     private greyListItemRepository: GreyListItemRepository;
@@ -17,8 +18,8 @@ export class GreyListFrameService implements FrameService {
     private whiteListItemRepository: WhiteListItemRepository;
     private deviceCommonService: DeviceCommonService;
 
-    constructor(mqttSenderService: MqttSenderService, repositoryFactory: RepositoryFactory) {
-        this.mqttSenderService = mqttSenderService;
+    constructor(repositoryFactory: RepositoryFactory, timestamp: string) {
+        this.timestamp = timestamp;
         this.greyListItemRepository = repositoryFactory.createGreyListRepository();
         this.deviceRepository = repositoryFactory.createDeviceRepository();
         this.whiteListItemRepository = repositoryFactory.createWhiteListRepository();
@@ -28,7 +29,7 @@ export class GreyListFrameService implements FrameService {
 
     public async handleMessage(greyListFrame: GreyListFrame): Promise<void> {
         try {
-            const currentDate = DateUtils.getCurrentDateStringFormat();
+            const currentDate = this.timestamp;
             const imei = greyListFrame.getImei();
             const device = await this.deviceCommonService.findDeviceByImei(imei);
 
@@ -47,26 +48,26 @@ export class GreyListFrameService implements FrameService {
         }
     }
 
-    private async constructGreyList(device: Device, greyListFrame: GreyListFrame): Promise<Partial<GreyListItem>[]> {
+    private async constructGreyList(device: Device, greyListFrame: GreyListFrame): Promise<Partial<GreylistItem>[]> {
         const greyList = greyListFrame.getGreylist();
-        const currentTime = DateUtils.getCurrentDateStringFormat();
+        const currentTime = this.timestamp;
         const greyListItems = greyList.map(sensorId => this.createGreyListItem(sensorId, device, currentTime));
 
         return Promise.all(greyListItems);
     }
 
-    private async createGreyListItem(sensorId: string, device: Device, timestamp: string): Promise<Partial<GreyListItem>> {
+    private async createGreyListItem(sensorId: string, device: Device, receptionTime: string): Promise<Partial<GreylistItem>> {
         const meterId = sensorId.slice(0, -4);
         const meter = await this.getOrCreateMeter(meterId);
         const rssi = parseInt(sensorId.slice(-4, -2), 16) * -1;
-        const numVeces = parseInt(sensorId.slice(-2), 16);
+        const viewCount = parseInt(sensorId.slice(-2), 16);
 
         return {
             device,
             meter,
             rssi,
-            numVeces,
-            timestamp,
+            viewCount,
+            receptionTime,
         };
     }
 
@@ -75,23 +76,23 @@ export class GreyListFrameService implements FrameService {
 
         if (!meter) {
             meter = new Meter();
-            meter.meter_id = meterId;
-            meter.manufacturer = this.determineManufacturer(meterId);
+            meter.meterId = meterId;
+            //meter.manufacturer = this.determineManufacturer(meterId);
             await this.meterRepository.createMeter(meter);
         }
 
         return meter;
     }
 
-    private determineManufacturer(meterId: string): string {
-        const meterPrefix = meterId.substring(0, 4).toUpperCase();
-        return manufacturerMap[meterPrefix] || null;
-    }
+    // private determineManufacturer(meterId: string): string {
+    //     const meterPrefix = meterId.substring(0, 4).toUpperCase();
+    //     return manufacturerMap[meterPrefix] || null;
+    // }
 
-    private async synchronizeGreyLists(newGreyList: Partial<GreyListItem>[], existingGreyList: GreyListItem[]): Promise<void> {
-        const existingGreyListMap = new Map(existingGreyList.map(item => [item.meter.meter_id, item]));
+    private async synchronizeGreyLists(newGreyList: Partial<GreylistItem>[], existingGreyList: GreylistItem[]): Promise<void> {
+        const existingGreyListMap = new Map(existingGreyList.map(item => [item.meter.meterId, item]));
         const operations = newGreyList.map(item => {
-            const existingItem = existingGreyListMap.get(item.meter.meter_id);
+            const existingItem = existingGreyListMap.get(item.meter.meterId);
 
             if (existingItem) {
                 return this.greyListItemRepository.updateGreyListItem(existingItem.id, item);
@@ -103,9 +104,9 @@ export class GreyListFrameService implements FrameService {
         await Promise.all(operations);
     }
 
-    private sendWhiteList(whitelist: WhiteListItem[], imei: string): void {
+    private sendWhiteList(whitelist: WhitelistItem[], imei: string): void {
         try {
-            const whitelistString = whitelist.map(item => item.meter.meter_id).join(',');
+            const whitelistString = whitelist.map(item => item.meter.meterId).join(',');
             const message = `\"whitelist;${whitelistString},}\"`;
             this.mqttSenderService.sendMessage(`r${imei}`, message);
         } catch (error) {

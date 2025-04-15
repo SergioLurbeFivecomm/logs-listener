@@ -10,7 +10,7 @@ export class DeviceRepository {
         this._repository = dataSource.getRepository(Device);
     }
     findDeviceByImei(imei: string): Promise<Device> {
-        return this._repository.findOne({ where: { imei }, order: { timestamp: 'DESC' } });
+        return this._repository.findOne({ where: { imei }, order: { bootTime: 'DESC' } });
     }
     
     findDevicesByImeis(imeis: string[]): Promise<Device[]> {

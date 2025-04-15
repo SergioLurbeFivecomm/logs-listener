@@ -1,5 +1,4 @@
 import { Address, Alarms, Coverage, Device } from "../entities/entitities";
-import { DateUtils } from '../utils/date.utils';
 
 import { DeviceStatusFrame } from '../../modules/frames/device-status.frame';
 import { Config } from "src/modules/frames/interfaces/config.interface";
@@ -53,58 +52,58 @@ export class DeviceStatusHelper {
     //     }
     // }
 
-    static prepareAlarms(alarmsList: string[], device: Device): Alarms {
+    static prepareAlarms(alarmsList: string[], device: Device, timestamp: string): Alarms {
         const alarms = new Alarms();
         alarms.device = device;
-        alarms.timestamp = DateUtils.getCurrentDateStringFormat();
-        alarms.sdNotDetected = 0;
-        alarms.sdFormated = 0;
-        alarms.sdCouldNotFormat = 0;
-        alarms.noWmbRead = 0;
-        alarms.primaryServerFailed = 0;
-        alarms.allBackupsFilled = 0;
-        alarms.simFailed = 0;
-        alarms.epromFailed = 0;
-        alarms.sdCouldNotMount = 0;
+        alarms.receptionTime = timestamp;
+        alarms.sdNotDetected = false;
+        alarms.sdFormatted = false;
+        alarms.sdCouldNotFormat = false;
+        alarms.noWmbRead = false;
+        alarms.primaryServerFailed = false;
+        alarms.allBackupsFilled = false;
+        alarms.simFailed = false;
+        alarms.epromFailed = false;
+        alarms.sdCouldNotMount = false;
 
         alarmsList.forEach(alarm => {
             switch (alarm) {
                 case "sd_not_detected":
-                    alarms.sdNotDetected = 1;
+                    alarms.sdNotDetected = true;
                     break;
                 case "sd_formated":
-                    alarms.sdFormated = 1;
+                    alarms.sdFormatted = true;
                     break;
                 case "sd_could_not_format":
-                    alarms.sdCouldNotFormat = 1;
+                    alarms.sdCouldNotFormat = true;
                     break;
                 case "no_wmb_read":
-                    alarms.noWmbRead = 1;
+                    alarms.noWmbRead = true;
                     break;
                 case "primary_server_failed":
-                    alarms.primaryServerFailed = 1;
+                    alarms.primaryServerFailed = true;
                     break;
                 case "all_backups_filled":
-                    alarms.allBackupsFilled = 1;
+                    alarms.allBackupsFilled = true;
                     break;
                 case "sim_failed":
-                    alarms.simFailed = 1;
+                    alarms.simFailed = true;
                     break;
                 case "eprom_failed":
-                    alarms.epromFailed = 1;
+                    alarms.epromFailed = true;
                     break;
                 case "sd_could_not_mount":
-                    alarms.sdCouldNotMount = 1;
+                    alarms.sdCouldNotMount = true;
                     break;
             }
         });
         return alarms;
     }
 
-    static prepareCoverage(sigtec: string, device: Device): Coverage {
+    static prepareCoverage(sigtec: string, device: Device, timestamp: string): Coverage {
         const sigtecParts = sigtec.split(';');
         const coverageValues = this.extractCoverageValues(sigtecParts);
-        return this.transformToCoverage(coverageValues, device);
+        return this.transformToCoverage(coverageValues, device, timestamp);
 
     }
 
@@ -127,21 +126,21 @@ export class DeviceStatusHelper {
         }, {});
     }
 
-    private static transformToCoverage(values: Record<string, string>, device: Device): Coverage {
+    private static transformToCoverage(values: Record<string, string>, device: Device, timestamp: string): Coverage {
         return {
             cc: parseInt(values['Cc'], 10),
             nc: values['Nc'],
             tac: parseInt(values['TAC'], 10),
             band: values['BAND'],
             earfcn: parseInt(values['EARFCN'], 10),
-            rsrp: parseFloat(values['RSRP']),
-            rsrq: parseFloat(values['RSRQ']),
+            rsrp: values['RSRP'],
+            rsrq: values['RSRQ'],
             pwd: parseInt(values['PWR'], 10),
             paging: parseInt(values['PAGING'], 10),
             cid: values['CID'],
             bw: parseInt(values['BW'], 10),
-            idCov: values['Id'],
-            timestamp: DateUtils.getCurrentDateStringFormat(),
+            idCov: parseInt(values['Id']),
+            receptionTime: timestamp,
             device: device
         };
     }

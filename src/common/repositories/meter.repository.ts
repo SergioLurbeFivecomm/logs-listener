@@ -9,12 +9,12 @@ export class MeterRepository {
     constructor(dataSource: DataSource) {
         this._repository = dataSource.getRepository(Meter);
     }
-    findMeterById(meter_id: string): Promise<Meter> {
-        return this._repository.findOne({ where: { meter_id }});
+    findMeterById(meterId: string): Promise<Meter> {
+        return this._repository.findOne({ where: { meterId }});
     }
 
-    updateMeterById(meter_id: string, updatedProperties: Partial<Meter>): Promise<UpdateResult> {
-        return this._repository.update({ meter_id }, updatedProperties);
+    updateMeterById(meterId: string, updatedProperties: Partial<Meter>): Promise<UpdateResult> {
+        return this._repository.update({ meterId }, updatedProperties);
     }
 
     createMeter(meter: Partial<Meter>) {

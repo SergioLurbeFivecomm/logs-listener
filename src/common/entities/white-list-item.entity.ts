@@ -1,30 +1,49 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    Entity,
+    Index,
+    JoinColumn,
     ManyToOne,
-    JoinColumn
-} from 'typeorm';
-import { Device } from './device.entity';
-import { Meter } from './meter.entity';
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Device, Meter } from "./entitities";
 
 
-@Entity('WHITELISTITEM')
-export class WhiteListItem {
-    @PrimaryGeneratedColumn()
-    id?: number;
+@Index("meter_id", ["meterId"], {})
+@Index("idx_whitelist_imei_assigned_at", ["deviceImei", "assignedAt"], {})
+@Entity("whitelist_item", { schema: "wiot_db" })
+export class WhitelistItem {
+    @PrimaryGeneratedColumn({ type: "int", name: "id" })
+    id: number;
 
-    @Column('timestamp', { nullable: true })
-    timestamp: string;
+    @Column("datetime", { name: "assigned_at" })
+    assignedAt: string;
 
-    @Column('tinyint', { name: 'is_active', default: 1 })
-    isActive: boolean;
+    @Column("tinyint", {
+        name: "is_active",
+        nullable: true,
+        width: 1,
+        default: () => "'1'",
+    })
+    isActive: boolean | null;
 
-    @ManyToOne(() => Device)
-    @JoinColumn({ name: 'device_id' })
+    @Column("varchar", { name: "device_imei", length: 15 })
+    deviceImei: string;
+
+    @Column("varchar", { name: "meter_id", length: 50 })
+    meterId: string;
+
+    @ManyToOne(() => Device, (device) => device.whitelistItems, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "device_imei", referencedColumnName: "imei" }])
     device: Device;
 
-    @ManyToOne(() => Meter)
-    @JoinColumn({ name: 'meter_id' })
+    @ManyToOne(() => Meter, (meter) => meter.whitelistItems, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "meter_id", referencedColumnName: "meterId" }])
     meter: Meter;
 }

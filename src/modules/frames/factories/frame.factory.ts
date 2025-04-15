@@ -1,11 +1,12 @@
 import { A1Frame, DeviceStatusFrame, GreyListFrame, SigtecFrame, WiotDataFrame } from '../frames';
 import { Frame } from '../interfaces/frame';
 import { Exception } from '../../../common/exceptions/exception';
+import { time } from 'console';
 
 export class FrameFactory {
     constructor() {}
 
-    createFrame(topic: string, message: string): Frame {
+    createFrame(topic: string, message: string, timestamp: string): Frame {
         if (topic === 'a1') {
             return new A1Frame(message);
         } else if (topic.startsWith('t')) {
@@ -13,11 +14,11 @@ export class FrameFactory {
             if (message.startsWith('{')) {
                 return new DeviceStatusFrame(imei, message);
             } else if (message.startsWith('sigtec')){
-                return new SigtecFrame(imei, message);
+                return new SigtecFrame(imei, message, timestamp);
             } if (message.startsWith('greylist')) {
                 return new GreyListFrame(imei, message);
             } else {
-                return new WiotDataFrame(imei, message);
+                return new WiotDataFrame(imei, message, timestamp);
             }
         }
         throw new Exception('Frame Factory exception', `Received message from unhandled topic ${topic}`);

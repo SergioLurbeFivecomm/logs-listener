@@ -1,42 +1,50 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    Entity,
+    Index,
+    JoinColumn,
     ManyToOne,
-    JoinColumn
-} from 'typeorm';
-import { Device } from './device.entity';
-import { Meter } from './meter.entity';
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { Device, Meter } from "./entitities";
 
-@Entity('WIOT_DATA')
+
+@Index("meter_id", ["meterId"], {})
+@Index("idx_data_imei_capture_time", ["deviceImei", "captureTime"], {})
+@Entity("wiot_data", { schema: "wiot_db" })
 export class WiotData {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ type: "int", name: "id" })
     id?: number;
 
-    @Column('int', { nullable: true })
-    hour: number;
+    @Column("datetime", { name: "capture_time" })
+    captureTime: string;
 
-    @Column('int', { nullable: true })
-    minutes?: number;
+    @Column("datetime", { name: "reception_time" })
+    receptionTime: string;
 
-    @Column('int', { nullable: true })
-    seconds?: number;
+    @Column("varchar", { name: "meter_id", length: 50 })
+    meterId?: string;
 
-    @Column('timestamp', { nullable: true })
-    received: string;
+    @Column("varchar", { name: "device_imei", length: 15 })
+    deviceImei?: string;
 
-    @Column('varchar', {name:"data_frame", length: 6200, nullable: true })
+    @Column("varchar", { name: "data_frame", length: 6200 })
     dataFrame: string;
 
-    @Column('int', { nullable: true })
+    @Column("smallint", { name: "rssi" })
     rssi: number;
 
-    @ManyToOne(() => Device)
-    @JoinColumn({ name: 'device_id', referencedColumnName: 'id' })
-    device: Device;
-
-    @ManyToOne(() => Meter)
-    @JoinColumn({ name: 'meter_id', referencedColumnName: 'meter_id' })
+    @ManyToOne(() => Meter, (meter) => meter.wiotData, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "meter_id", referencedColumnName: "meterId" }])
     meter: Meter;
 
+    @ManyToOne(() => Device, (device) => device.wiotData, {
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+    })
+    @JoinColumn([{ name: "device_imei", referencedColumnName: "imei" }])
+    device: Device;
 }

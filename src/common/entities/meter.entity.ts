@@ -1,34 +1,28 @@
 import {
-    Entity,
-    PrimaryColumn,
     Column,
+    Entity,
+    Index,
     OneToMany,
-    JoinColumn
-} from 'typeorm';
-import { GreyListItem } from './grey-list-item.entity';
-import { WhiteListItem } from './white-list-item.entity';
+} from "typeorm";
+import { WiotData } from "./entitities";
+import { GreylistItem } from "./grey-list-item.entity";
+import { WhitelistItem } from "./white-list-item.entity";
 
-
-@Entity('METER')
+@Index("key", ["key"], {})
+@Entity("meter", { schema: "wiot_db" })
 export class Meter {
-    @PrimaryColumn()
-    meter_id: string;
-    
-    @Column('varchar', { nullable: true })
-    manufacturer: string;
+    @Column("varchar", { primary: true, name: "meter_id", length: 50 })
+    meterId: string;
 
-    @Column('varchar', { nullable: true })
-    model: string;
-
-    @Column('varchar', { nullable: true })
-    vertical: string;
-
-    @Column('varchar', { nullable: true })
+    @Column("varchar", { name: "key", length: 100 })
     key: string;
 
-    @OneToMany(() => GreyListItem, greyList => greyList.device)
-    greyLists: GreyListItem[];
+    @OneToMany(() => WiotData, (wiotData) => wiotData.meter)
+    wiotData: WiotData[];
 
-    @OneToMany(() => WhiteListItem, whiteList => whiteList.device)
-    whiteLists: WhiteListItem[];
+    @OneToMany(() => GreylistItem, (greylistItem) => greylistItem.meter)
+    greylistItems: GreylistItem[];
+
+    @OneToMany(() => WhitelistItem, (whitelistItem) => whitelistItem.meter)
+    whitelistItems: WhitelistItem[];
 }
