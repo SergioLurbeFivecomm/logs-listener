@@ -8,7 +8,6 @@ import { AddressRepository, CoverageRepository, AlarmsRepository} from '../../..
 import { DeviceStatusHelper } from '../../../common/helpers/device-status.helper';
 import { Address } from '../../../common/entities/address.entity';
 import { RepositoryFactory } from '../../../common/factories/repository-factory';
-import { MqttSenderService } from '../../mqtt/mqtt-sender.service';
 import { DeviceCommonService } from '../../../common/services/device-common.service';
 
 export class DeviceStatusFrameService implements FrameService {
@@ -29,11 +28,19 @@ export class DeviceStatusFrameService implements FrameService {
     }
 
     async handleMessage(deviceStatusFrame: DeviceStatusFrame): Promise<void> {
-        const imei = deviceStatusFrame.getImei();
-        const device = await this.deviceCommonService.findDeviceByImei(imei);
-        const address = await this.addressRepository.findAddressByImei(imei);
-        if(!address) throw new Exception('Address not found', `Address not found for imei: ${imei} in Device Status Frame Service handle message`)
-        await this.updateDeviceStatusProperties(deviceStatusFrame, device, address);
+        try {
+            const imei = deviceStatusFrame.getImei();
+            const device = await this.deviceRepository.findDeviceByImei(imei);
+            if (!device){
+                throw new Exception('Device not found', `Device not found for imei: ${imei} in Device Common Service handle message`);
+            }
+            const address = await this.addressRepository.findAddressByImei(imei);
+            if(!address) throw new Exception('Address not found', `Address not found for imei: ${imei} in Device Status Frame Service handle message`)
+            await this.updateDeviceStatusProperties(deviceStatusFrame, device, address);
+        } catch (error) {
+            console.log(error);
+        }
+
     }
 
     
@@ -41,7 +48,7 @@ export class DeviceStatusFrameService implements FrameService {
     private async updateDeviceStatusProperties(deviceStatusFrame: DeviceStatusFrame, device: Device, address: Address) {
         device.fota = 'None';
         device.lastMessageSent = this.timestamp;
-        const coverage = DeviceStatusHelper.prepareCoverage(deviceStatusFrame.getSigtec(), device, this.timestamp);
+        const coverage = DeviceStatusHelper.prepareCoverage(deviceStatusFrame.getSigtec(), device, this.timestamp, deviceStatusFrame.getLte());
         const alarms = DeviceStatusHelper.prepareAlarms(deviceStatusFrame.getAlarms(), device, this.timestamp);
         const devicePrepared = DeviceStatusHelper.prepareDevice(deviceStatusFrame, device);
         const addressPrepared = await this.checkAddressUpdate(deviceStatusFrame.getConfig(), address);

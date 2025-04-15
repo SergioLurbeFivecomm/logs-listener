@@ -10,10 +10,15 @@ export class DeviceCommonService {
     }
 
     async findDeviceByImei(imei: string): Promise<Device>{
-        const device = await this.deviceRepository.findDeviceByImei(imei);
-        if (!device){
-            throw new Exception('Device not found', `Device not found for imei: ${imei} in Device Common Service handle message`);
+        try {
+            const device = await this.deviceRepository.findDeviceByImei(imei);
+            if (!device){
+                throw new Exception('Device not found', `Device not found for imei: ${imei} in Device Common Service handle message`);
+            }
+            return device;
+        } catch (error) {
+            return null;
         }
-        return device;
+
     }
 }

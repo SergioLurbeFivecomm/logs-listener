@@ -10,19 +10,21 @@ export class DeviceStatusFrame implements Frame {
     private config: Config;
     private sigtec: string;
     private battery: string;
+    private lte: string;
     private alarms: string[];
 
     constructor(imei: string, payload: string){
         this.imei = imei;
         if(!JSONUtils.isJsonValid(payload)) throw new Exception('JSON is not valid', `Config frame json is not valid: ${payload}`)
         this.payload = payload;
-        const {config, sigtec, battery, alarms } = JSON.parse(payload);
+        const {config, sigtec, battery, alarms, lte } = JSON.parse(payload);
         this.isValidPayload(imei, config, sigtec, battery, alarms);
         this.imei = imei;
         this.config = config;
         this.sigtec = sigtec;
         this.battery = battery;
         this.alarms = alarms;
+        this.lte = lte;
     }
 
     private isValidPayload(imei: string, config: Config, sigtec: string, battery: number, alarms: string[]): void {
@@ -50,6 +52,10 @@ export class DeviceStatusFrame implements Frame {
 
     public getAlarms(): string[] {
         return this.alarms;
+    }
+
+    public getLte(): string {
+        return this.lte
     }
 }
 

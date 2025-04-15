@@ -100,10 +100,10 @@ export class DeviceStatusHelper {
         return alarms;
     }
 
-    static prepareCoverage(sigtec: string, device: Device, timestamp: string): Coverage {
+    static prepareCoverage(sigtec: string, device: Device, timestamp: string, lte: string): Coverage {
         const sigtecParts = sigtec.split(';');
         const coverageValues = this.extractCoverageValues(sigtecParts);
-        return this.transformToCoverage(coverageValues, device, timestamp);
+        return this.transformToCoverage(coverageValues, device, timestamp, lte);
 
     }
 
@@ -126,7 +126,7 @@ export class DeviceStatusHelper {
         }, {});
     }
 
-    private static transformToCoverage(values: Record<string, string>, device: Device, timestamp: string): Coverage {
+    private static transformToCoverage(values: Record<string, string>, device: Device, timestamp: string, lte: string): Coverage {
         return {
             cc: parseInt(values['Cc'], 10),
             nc: values['Nc'],
@@ -139,7 +139,8 @@ export class DeviceStatusHelper {
             paging: parseInt(values['PAGING'], 10),
             cid: values['CID'],
             bw: parseInt(values['BW'], 10),
-            idCov: parseInt(values['Id']),
+            idCov: parseInt(values['Id'], 10),
+            lte: lte,
             receptionTime: timestamp,
             device: device
         };

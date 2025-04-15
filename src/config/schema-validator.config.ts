@@ -10,7 +10,7 @@ export class SchemaValidator {
 
     public async validate(): Promise<void> {
         try {
-            const tablesToValidate = ['DEVICE', 'COVERAGE', 'GREYLISTITEM', 'ALARMS', 'ADDRESS', 'METER', 'WIOT_DATA', 'WHITELISTITEM'];
+            const tablesToValidate = ['device', 'coverage', 'greylist_item', 'alarms', 'address', 'meter', 'wiot_data', 'whitelist_item'];
             for (const table of tablesToValidate) {
                 await this.compareTableWithEntity(table);
             }

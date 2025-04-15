@@ -34,7 +34,7 @@ export class GreyListFrameService implements FrameService {
             const device = await this.deviceCommonService.findDeviceByImei(imei);
 
             const whitelist = await this.whiteListItemRepository.findWhiteListByImei(imei);
-            this.sendWhiteList(whitelist, imei);
+
 
             const greyList = await this.constructGreyList(device, greyListFrame);
             const greyListToday = await this.greyListItemRepository.findAllByImeiDate(imei, currentDate);
@@ -104,13 +104,4 @@ export class GreyListFrameService implements FrameService {
         await Promise.all(operations);
     }
 
-    private sendWhiteList(whitelist: WhitelistItem[], imei: string): void {
-        try {
-            const whitelistString = whitelist.map(item => item.meter.meterId).join(',');
-            const message = `\"whitelist;${whitelistString},}\"`;
-            this.mqttSenderService.sendMessage(`r${imei}`, message);
-        } catch (error) {
-            logger.error(`Error sending whitelist: ${error.message}`);
-        }
-    }
 }

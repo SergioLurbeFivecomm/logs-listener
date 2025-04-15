@@ -14,7 +14,7 @@ export class GreyListItemRepository {
             .createQueryBuilder('greyList')
             .innerJoinAndSelect('greyList.meter', 'meter')
             .innerJoin('greyList.device', 'device')
-            .where('device.imei = :imei AND Date(greyList.timestamp) = Date(:date)', { imei, date })
+            .where('device.imei = :imei AND Date(greyList.reception_time) = Date(:date)', { imei, date })
             .getMany();
     }
 

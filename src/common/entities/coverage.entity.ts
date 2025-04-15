@@ -50,6 +50,9 @@ export class Coverage {
   @Column("int", { name: "bw" })
   bw: number;
 
+  @Column("varchar", {name: "lte", length: 20})
+  lte: string;
+
   @Column("int", { name: "id_cov" })
   idCov: number;
 

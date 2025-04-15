@@ -30,7 +30,8 @@ export class WiotDataFrameService implements FrameService {
         const imei = wiotDataFrame.getImei();
         try {
             const dataFields = wiotDataFrame.getWiotData();
-            const device = await this.deviceCommonService.findDeviceByImei(imei);
+            //const device = await this.deviceCommonService.findDeviceByImei(imei);
+            const device = await this.deviceRepository.findDeviceByImei(imei);
             const receivedTime = wiotDataFrame.getBackupTime();
 
             const baseDateStr = receivedTime.split(' ')[0];

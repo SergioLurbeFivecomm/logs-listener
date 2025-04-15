@@ -28,7 +28,7 @@ export class LogReaderService {
                 if (topic.startsWith('r')) continue;
 
                 const timestamp = rawTimestamp.replace('_', ' '); 
-                this.messageProcessorService.processMessage(timestamp, topic, message);
+                await this.messageProcessorService.processMessage(timestamp, topic, message);
 
             }
         }

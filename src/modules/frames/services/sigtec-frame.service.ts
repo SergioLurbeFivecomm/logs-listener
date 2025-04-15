@@ -54,6 +54,7 @@ export class SigtecFrameService implements FrameService {
             cid: sigtecFrame.getCid(),
             bw: sigtecFrame.getBw(),
             idCov: sigtecFrame.getIdCov(),
+            lte: '',
             receptionTime: sigtecFrame.getTimestamp(),
             device: device
         }

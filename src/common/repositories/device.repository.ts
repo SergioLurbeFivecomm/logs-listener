@@ -9,9 +9,14 @@ export class DeviceRepository {
     constructor(dataSource: DataSource) {
         this._repository = dataSource.getRepository(Device);
     }
-    findDeviceByImei(imei: string): Promise<Device> {
-        return this._repository.findOne({ where: { imei }, order: { bootTime: 'DESC' } });
+    async findDeviceByImei(imei: string): Promise<Device | null> {
+        const devices = await this._repository.find({
+            where: { imei },
+            order: { bootTime: 'DESC' }
+        });
+        return devices[0] ?? null;
     }
+    
     
     findDevicesByImeis(imeis: string[]): Promise<Device[]> {
         return this._repository.find({ where: { imei: In(imeis) } });

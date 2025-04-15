@@ -16,7 +16,7 @@ export class MessageProcessorService {
     constructor(
         repositoryFactory: RepositoryFactory
     ) {
-
+        this.repositoryFactory = repositoryFactory;
     }
 
 
