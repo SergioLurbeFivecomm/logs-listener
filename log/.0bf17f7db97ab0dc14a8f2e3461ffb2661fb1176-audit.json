@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "/home/sergio/Documentos/repos/server_WIOT_HUB/server/log/.0bf17f7db97ab0dc14a8f2e3461ffb2661fb1176-audit.json",
+    "files": [
+        {
+            "date": 1715940654939,
+            "name": "/home/sergio/Documentos/repos/server_WIOT_HUB/server/log/application-2024-05-17.log",
+            "hash": "bbb8fa5b846fb094b65840ea51f803cd0da0628a844408ae8a520c372749d5fa"
+        }
+    ],
+    "hashType": "sha256"
+}
